@@ -1,0 +1,23 @@
+name: youtube
+version: 0.1.0
+dsl_version: 3
+backend: jsonl
+test_queries:
+  - SELECT id, title FROM youtube.videos LIMIT 1
+tables:
+  - name: videos
+    description: YouTube channel videos with analytics
+    source:
+      location: file:///C:/Users/yashj/OneDrive/Desktop/Coral Hackathon/sources/
+      glob: "youtube_mock.jsonl"
+    columns:
+      - name: id
+        type: Utf8
+      - name: title
+        type: Utf8
+      - name: description
+        type: Utf8
+      - name: published_at
+        type: Utf8
+      - name: channel_id
+        type: Utf8

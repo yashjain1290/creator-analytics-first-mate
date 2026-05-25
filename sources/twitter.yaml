@@ -1,0 +1,27 @@
+name: twitter
+version: 0.1.0
+dsl_version: 3
+backend: jsonl
+test_queries:
+  - SELECT id, text FROM twitter.tweets LIMIT 1
+tables:
+  - name: tweets
+    description: Twitter/X tweets with engagement metrics
+    source:
+      location: file:///C:/Users/yashj/OneDrive/Desktop/Coral Hackathon/sources/
+      glob: "twitter_mock.jsonl"
+    columns:
+      - name: id
+        type: Utf8
+      - name: text
+        type: Utf8
+      - name: created_at
+        type: Utf8
+      - name: retweet_count
+        type: Int64
+      - name: like_count
+        type: Int64
+      - name: reply_count
+        type: Int64
+      - name: impression_count
+        type: Int64

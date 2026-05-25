@@ -1,0 +1,49 @@
+name: discord
+version: 0.1.0
+dsl_version: 3
+backend: http
+inputs:
+  DISCORD_BOT_TOKEN:
+    kind: secret
+base_url: "https://discord.com"
+auth:
+  type: HeaderAuth
+  headers:
+    - name: Authorization
+      from: template
+      template: "Bot {{input.DISCORD_BOT_TOKEN}}"
+test_queries:
+  - SELECT id, content, author_username FROM discord.messages LIMIT 1
+tables:
+  - name: messages
+    description: Messages from a Discord channel
+    request:
+      method: GET
+      path: "/api/v10/channels/1508159317461700811/messages?limit=100"
+    response: {}
+    columns:
+      - name: id
+        type: Utf8
+        expr:
+          kind: path
+          path:
+            - id
+      - name: content
+        type: Utf8
+        expr:
+          kind: path
+          path:
+            - content
+      - name: timestamp
+        type: Utf8
+        expr:
+          kind: path
+          path:
+            - timestamp
+      - name: author_username
+        type: Utf8
+        expr:
+          kind: path
+          path:
+            - author
+            - username
