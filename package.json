@@ -1,0 +1,30 @@
+{
+  "name": "coral-hackathon",
+  "version": "1.0.0",
+  "description": "A unified creator analytics agent using Coral, YouTube, Twitter/X, Discord and Gemini AI",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yashjain1290/creator-analytics-first-mate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yashjain1290/creator-analytics-first-mate/issues"
+  },
+  "homepage": "https://github.com/yashjain1290/creator-analytics-first-mate#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.16.1",
+    "dotenv": "^17.4.2",
+    "groq-sdk": "^1.2.0"
+  }
+}
