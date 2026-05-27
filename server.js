@@ -168,7 +168,7 @@ app.get('/api/discord', isAuth, (req, res) => {
 
 const PORT = 3000
 // Catch-all route for React Router
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'API route not found' })
   }
