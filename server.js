@@ -15,6 +15,7 @@ const { runQuery } = require('./agent/queryRunner')
 const { analyzeCreatorData } = require('./agent/gemini')
 
 const app = express()
+app.set('trust proxy', 1)
 
 // Middleware
 app.use(cors({
@@ -36,9 +37,11 @@ app.use(session({
     mongoUrl: process.env.MONGODB_URI,
     ttl: 24 * 60 * 60
   }),
-  cookie: { 
+  cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000
   }
 }))
 
