@@ -113,7 +113,7 @@ app.get('/api/discord', isAuth, (req, res) => {
 
 const PORT = 3000
 // Catch-all route for React Router
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'))
 })
 app.listen(PORT, () => {
