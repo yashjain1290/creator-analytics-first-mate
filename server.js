@@ -26,7 +26,9 @@ app.use(express.json())
 const path = require('path')
 
 // Serve React frontend in production
-app.use(express.static(path.join(__dirname, 'frontend/dist')))
+const distPath = path.join(__dirname, 'frontend', 'dist')
+console.log('Dist path:', distPath)
+app.use(express.static(distPath))
 
 
 app.use(session({
@@ -172,7 +174,9 @@ app.get('/{*path}', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'API route not found' })
   }
-  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'))
+  const indexPath = path.join(__dirname, 'frontend', 'dist', 'index.html')
+  console.log('Serving index from:', indexPath)
+  res.sendFile(indexPath)
 })
 
 // ── YOUTUBE OAUTH ROUTES ──
