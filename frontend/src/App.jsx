@@ -8,6 +8,7 @@ import YouTube from './pages/YouTube'
 import Twitter from './pages/Twitter'
 import Discord from './pages/Discord'
 import Insights from './pages/Insights'
+import Connect from './pages/Connect'
 
 export default function App() {
   return (
@@ -30,6 +31,9 @@ export default function App() {
           } />
           <Route path="/insights" element={
             <ProtectedRoute><Insights /></ProtectedRoute>
+          } />
+          <Route path="/connect" element={
+            <ProtectedRoute><Connect /></ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>

@@ -7,6 +7,7 @@ const navItems = [
   { path: '/twitter', icon: '𝕏', label: 'Twitter/X' },
   { path: '/discord', icon: '💬', label: 'Discord' },
   { path: '/insights', icon: '🤖', label: 'AI Insights' },
+  { path: '/connect', icon: '🔌', label: 'Connect' },
 ]
 
 export default function Sidebar() {
