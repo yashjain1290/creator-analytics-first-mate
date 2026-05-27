@@ -15,6 +15,10 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
+const path = require('path')
+
+// Serve React frontend in production
+app.use(express.static(path.join(__dirname, 'frontend/dist')))
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -108,6 +112,10 @@ app.get('/api/discord', isAuth, (req, res) => {
 })
 
 const PORT = 3000
+// Catch-all route for React Router
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'))
+})
 app.listen(PORT, () => {
   console.log(`\n🏴‍☠️ Server running on http://localhost:${PORT}`)
   console.log(`🔐 Auth: http://localhost:${PORT}/api/auth/google\n`)
