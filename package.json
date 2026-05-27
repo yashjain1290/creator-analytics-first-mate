@@ -13,8 +13,8 @@
     "dev": "node server.js"
   },
   "engines": {
-  "node": ">=20.0.0"
-},
+    "node": ">=20.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yashjain1290/creator-analytics-first-mate.git"
@@ -30,6 +30,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.16.1",
+    "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -37,6 +38,7 @@
     "express-session": "^1.19.0",
     "groq-sdk": "^1.2.0",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   }
