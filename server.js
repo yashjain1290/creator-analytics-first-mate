@@ -168,9 +168,13 @@ app.get('/api/discord', isAuth, (req, res) => {
 
 const PORT = 3000
 // Catch-all route for React Router
-app.get('/{*path}', (req, res) => {
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' })
+  }
   res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'))
 })
+
 // ── YOUTUBE OAUTH ROUTES ──
 app.get('/api/auth/youtube', isAuth, (req, res) => {
   const url = youtubeAuth.getAuthUrl()
@@ -201,7 +205,7 @@ app.get('/api/auth/youtube/callback', isAuth, async (req, res) => {
     }
 
     console.log('YouTube connected for:', req.user.email)
-    res.redirect(process.env.FRONTEND_URL + '/dashboard?youtube=connected')
+    res.redirect(process.env.FRONTEND_URL + '/connect?youtube=connected')
   } catch (err) {
     console.error('YouTube OAuth error:', err)
     res.redirect(process.env.FRONTEND_URL + '/dashboard?error=youtube_failed')
