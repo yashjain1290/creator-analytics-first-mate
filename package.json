@@ -12,6 +12,9 @@
     "build": "cd frontend && npm install && npm run build",
     "dev": "node server.js"
   },
+  "engines": {
+  "node": ">=20.0.0"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yashjain1290/creator-analytics-first-mate.git"
