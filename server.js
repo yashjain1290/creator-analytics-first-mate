@@ -4,6 +4,7 @@ const { User, Analytics, InsightHistory } = require('./db/models')
 
 // Connect to MongoDB
 connectDB()
+const youtubeAuth = require('./auth/youtube')
 const express = require('express')
 const cors = require('cors')
 const session = require('express-session')
@@ -164,6 +165,62 @@ const PORT = 3000
 // Catch-all route for React Router
 app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'))
+})
+// ── YOUTUBE OAUTH ROUTES ──
+app.get('/api/auth/youtube', isAuth, (req, res) => {
+  const url = youtubeAuth.getAuthUrl()
+  res.redirect(url)
+})
+
+app.get('/api/auth/youtube/callback', isAuth, async (req, res) => {
+  try {
+    const { code } = req.query
+    const tokens = await youtubeAuth.getTokens(code)
+    const channel = await youtubeAuth.getChannel(tokens.access_token, tokens.refresh_token)
+
+    // Save tokens to user in MongoDB
+    await User.findByIdAndUpdate(req.user.id, {
+      'platforms.youtube': {
+        connected: true,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        channelId: channel?.id,
+        channelName: channel?.snippet?.title
+      }
+    })
+
+    // Update session
+    req.user.platforms = {
+      ...req.user.platforms,
+      youtube: { connected: true, channelName: channel?.snippet?.title }
+    }
+
+    console.log('YouTube connected for:', req.user.email)
+    res.redirect(process.env.FRONTEND_URL + '/dashboard?youtube=connected')
+  } catch (err) {
+    console.error('YouTube OAuth error:', err)
+    res.redirect(process.env.FRONTEND_URL + '/dashboard?error=youtube_failed')
+  }
+})
+
+// Get real YouTube data for logged in user
+app.get('/api/youtube/real', isAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+
+    if (!user.platforms.youtube.connected) {
+      return res.json({ success: false, error: 'YouTube not connected' })
+    }
+
+    const videos = await youtubeAuth.getVideos(
+      user.platforms.youtube.accessToken,
+      user.platforms.youtube.refreshToken
+    )
+
+    res.json({ success: true, data: videos })
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message })
+  }
 })
 app.listen(PORT, () => {
   console.log(`\n🏴‍☠️ Server running on http://localhost:${PORT}`)
