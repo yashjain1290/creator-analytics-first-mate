@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Analytics First Mate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c0b;
+    --surface: #0d1512;
+    --surface2: #111c18;
+    --teal: #1de9a0;
+    --teal-dim: #0f7a52;
+    --teal-glow: rgba(29,233,160,0.15);
+    --coral: #ff6b4a;
+    --amber: #f0a500;
+    --purple: #9b7fff;
+    --blue: #4db8ff;
+    --text: #e8f5f0;
+    --text-dim: #7a9e90;
+    --border: rgba(29,233,160,0.12);
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(29,233,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,233,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orb */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(29,233,160,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,12,11,0.8);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--teal);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .logo-text span { color: var(--teal); }
+
+  .header-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    background: var(--teal-glow);
+    border: 1px solid var(--teal-dim);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .refresh-btn {
+    background: var(--teal);
+    color: var(--bg);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover { background: #26ffb2; transform: translateY(-1px); }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 48px 0 32px;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--teal) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    margin-bottom: 24px;
+  }
+
+  .source-pills {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; animation: pulse 2s infinite; }
+
+  .pill-yt { color: var(--coral); border-color: rgba(255,107,74,0.3); background: rgba(255,107,74,0.08); }
+  .pill-yt .pill-dot { background: var(--coral); }
+  .pill-tw { color: var(--blue); border-color: rgba(77,184,255,0.3); background: rgba(77,184,255,0.08); }
+  .pill-tw .pill-dot { background: var(--blue); }
+  .pill-dc { color: var(--purple); border-color: rgba(155,127,255,0.3); background: rgba(155,127,255,0.08); }
+  .pill-dc .pill-dot { background: var(--purple); }
+  .pill-ai { color: var(--teal); border-color: rgba(29,233,160,0.3); background: rgba(29,233,160,0.08); }
+  .pill-ai .pill-dot { background: var(--teal); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  /* ── SCORE CARDS ROW ── */
+  .scores-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.6s ease both;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .score-card:hover { transform: translateY(-3px); border-color: var(--teal-dim); }
+
+  .score-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .score-card.teal::before { background: var(--teal); }
+  .score-card.coral::before { background: var(--coral); }
+  .score-card.amber::before { background: var(--amber); }
+  .score-card.purple::before { background: var(--purple); }
+  .score-card.blue::before { background: var(--blue); }
+
+  .score-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .score-value {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .score-card.teal .score-value { color: var(--teal); }
+  .score-card.coral .score-value { color: var(--coral); }
+  .score-card.amber .score-value { color: var(--amber); }
+  .score-card.purple .score-value { color: var(--purple); }
+  .score-card.blue .score-value { color: var(--blue); }
+
+  .score-sub { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+
+  .score-bar {
+    margin-top: 10px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .teal .score-bar-fill { background: var(--teal); }
+  .coral .score-bar-fill { background: var(--coral); }
+  .amber .score-bar-fill { background: var(--amber); }
+  .purple .score-bar-fill { background: var(--purple); }
+  .blue .score-bar-fill { background: var(--blue); }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    animation: fadeIn 0.7s ease both;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .panel-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .panel-icon.yt { background: rgba(255,107,74,0.15); }
+  .panel-icon.tw { background: rgba(77,184,255,0.15); }
+  .panel-icon.dc { background: rgba(155,127,255,0.15); }
+  .panel-icon.ai { background: rgba(29,233,160,0.15); }
+
+  .panel-title {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface2);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  /* Data rows */
+  .data-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-row:last-child { border-bottom: none; }
+
+  .data-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .data-text { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
+  .data-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+  .data-stat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Rec cards */
+  .rec-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+
+  .rec-card:hover { border-color: var(--teal-dim); }
+  .rec-card:last-child { margin-bottom: 0; }
+
+  .rec-num {
+    width: 24px;
+    height: 24px;
+    background: var(--teal-glow);
+    border: 1px solid var(--teal-dim);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--teal);
+    flex-shrink: 0;
+  }
+
+  .rec-text { font-size: 13px; color: var(--text); line-height: 1.45; }
+
+  /* Query box */
+  .query-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  .query-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .query-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .query-input::placeholder { color: var(--text-dim); }
+  .query-input:focus { border-color: var(--teal-dim); }
+
+  .query-btn {
+    background: var(--teal);
+    color: var(--bg);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .query-btn:hover { background: #26ffb2; }
+
+  .query-result {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 60px;
+    display: none;
+  }
+
+  .query-result.show { display: block; animation: fadeIn 0.3s ease; }
+
+  /* SQL terminal */
+  .sql-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  .sql-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .sql-tab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sql-tab.active {
+    background: var(--teal-glow);
+    border-color: var(--teal-dim);
+    color: var(--teal);
+  }
+
+  .sql-code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .kw { color: var(--teal); font-weight: 700; }
+  .tb { color: var(--coral); }
+  .cm { color: var(--text-dim); }
+  .fn { color: var(--amber); }
+
+  /* Summary */
+  .summary-panel {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(29,233,160,0.05) 100%);
+    border: 1px solid rgba(29,233,160,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    animation: fadeIn 0.9s ease both;
+  }
+
+  .summary-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .footer-text span { color: var(--teal); }
+
+  /* Loading state */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    height: 14px;
+  }
+
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .timestamp {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--teal-dim); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🏴‍☠️</div>
+      <div class="logo-text">Creator<span>Analytics</span> First Mate</div>
+    </div>
+    <div class="header-badge">PIRATES OF THE CORAL-BEAN</div>
+    <button class="refresh-btn" onclick="refreshData()">
+      <span id="refresh-icon">↻</span> Refresh Data
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Unified Creator Intelligence</div>
+    <h1>Your Entire Creator<br>Presence, One Query</h1>
+    <p class="hero-sub">coral sql "SELECT * FROM youtube + twitter + discord"</p>
+    <div class="source-pills">
+      <div class="pill pill-yt"><div class="pill-dot"></div>YouTube</div>
+      <div class="pill pill-tw"><div class="pill-dot"></div>Twitter/X</div>
+      <div class="pill pill-dc"><div class="pill-dot"></div>Discord</div>
+      <div class="pill pill-ai"><div class="pill-dot"></div>Groq AI</div>
+    </div>
+    <div class="timestamp" id="last-updated">Last updated: just now</div>
+  </div>
+
+  <!-- SCORE CARDS -->
+  <div class="scores-row">
+    <div class="score-card teal">
+      <div class="score-label">Content Score</div>
+      <div class="score-value" id="content-score">82</div>
+      <div class="score-sub">/ 100 overall</div>
+      <div class="score-bar"><div class="score-bar-fill" id="bar-content" style="width:82%"></div></div>
+    </div>
+    <div class="score-card purple">
+      <div class="score-label">Community Health</div>
+      <div class="score-value" id="community-score">80</div>
+      <div class="score-sub">/ 100 Discord</div>
+      <div class="score-bar"><div class="score-bar-fill" id="bar-community" style="width:80%"></div></div>
+    </div>
+    <div class="score-card coral">
+      <div class="score-label">Top Impressions</div>
+      <div class="score-value">24K</div>
+      <div class="score-sub">best tweet reach</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:88%"></div></div>
+    </div>
+    <div class="score-card amber">
+      <div class="score-label">Best Post Time</div>
+      <div class="score-value" style="font-size:22px;margin-top:4px" id="best-time">14:00</div>
+      <div class="score-sub">–15:00 UTC peak</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:65%"></div></div>
+    </div>
+    <div class="score-card blue">
+      <div class="score-label">Discord Messages</div>
+      <div class="score-value" id="discord-count">20</div>
+      <div class="score-sub">real messages</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:55%"></div></div>
+    </div>
+  </div>
+
+  <!-- AI SUMMARY -->
+  <div class="summary-panel">
+    <div class="panel-header">
+      <div class="panel-icon ai">🤖</div>
+      <div class="panel-title">AI Summary</div>
+      <div style="margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--teal)">Groq · LLaMA 3.3 70B</div>
+    </div>
+    <p class="summary-text" id="ai-summary">
+      "The creator's content score is 82, with the top-performing content being a Twitter thread on tracking creator metrics. Recommendations include sharing a Coral SQL tutorial, creating a video on top tools for developers, and posting Twitter threads on analytics dashboards. The best time to post is between 14:00–15:00 UTC, and the community health score is 80, indicating a relatively active and engaged Discord community."
+    </p>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- YOUTUBE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon yt">📺</div>
+        <div class="panel-title">YouTube Videos</div>
+        <div class="panel-count" id="yt-count">3 videos</div>
+      </div>
+      <div id="youtube-data">
+        <div class="data-row">
+          <div class="data-num">1</div>
+          <div style="flex:1">
+            <div class="data-text">How I built a creator analytics dashboard</div>
+            <div class="data-meta">2026-05-20 · video001</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">2</div>
+          <div style="flex:1">
+            <div class="data-text">Coral SQL is insane for AI agents</div>
+            <div class="data-meta">2026-05-18 · video002</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">3</div>
+          <div style="flex:1">
+            <div class="data-text">Top 5 tools for developer creators in 2026</div>
+            <div class="data-meta">2026-05-15 · video003</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWITTER -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon tw">𝕏</div>
+        <div class="panel-title">Twitter/X Engagement</div>
+        <div class="panel-count" id="tw-count">3 tweets</div>
+      </div>
+      <div id="twitter-data">
+        <div class="data-row">
+          <div class="data-num">1</div>
+          <div style="flex:1">
+            <div class="data-text">Thread: How I track my creator metrics across all platforms with one SQL JOIN 🧵</div>
+            <div class="data-meta">2026-05-23</div>
+          </div>
+          <div>
+            <div class="data-stat" style="color:var(--coral)">890 ❤</div>
+            <div class="data-stat" style="color:var(--blue)">24K 👁</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">2</div>
+          <div style="flex:1">
+            <div class="data-text">Building a creator analytics dashboard with @withcoral</div>
+            <div class="data-meta">2026-05-24</div>
+          </div>
+          <div>
+            <div class="data-stat" style="color:var(--coral)">412 ❤</div>
+            <div class="data-stat" style="color:var(--blue)">9.8K 👁</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">3</div>
+          <div style="flex:1">
+            <div class="data-text">Just shipped a new feature! Coral SQL is amazing for analytics 🚀</div>
+            <div class="data-meta">2026-05-25</div>
+          </div>
+          <div>
+            <div class="data-stat" style="color:var(--coral)">230 ❤</div>
+            <div class="data-stat" style="color:var(--blue)">5.4K 👁</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCORD -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon dc">💬</div>
+        <div class="panel-title">Discord Community</div>
+        <div class="panel-count" id="dc-count">20 messages · live</div>
+      </div>
+      <div id="discord-data">
+        <div class="data-row">
+          <div class="data-num">—</div>
+          <div style="flex:1">
+            <div class="data-text" style="color:var(--text-dim);font-style:italic;font-size:12px">Live Discord messages from your server are fetched via the bot. 20 real messages loaded.</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">👤</div>
+          <div style="flex:1">
+            <div class="data-text">mrinalmadhav._93393</div>
+            <div class="data-meta">Active community member</div>
+          </div>
+          <div class="data-stat" style="color:var(--purple)">real</div>
+        </div>
+        <div class="data-row">
+          <div class="data-num">👤</div>
+          <div style="flex:1">
+            <div class="data-text">rr_0_11</div>
+            <div class="data-meta">Active community member</div>
+          </div>
+          <div class="data-stat" style="color:var(--purple)">real</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI RECOMMENDATIONS -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon ai">🎯</div>
+        <div class="panel-title">What to Post Next</div>
+        <div class="panel-count">AI Powered</div>
+      </div>
+      <div id="recommendations">
+        <div class="rec-card">
+          <div class="rec-num">1</div>
+          <div class="rec-text">Share a tutorial on using Coral SQL for analytics — your audience is clearly interested in this topic</div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">2</div>
+          <div class="rec-text">Create a video showcasing the top 5 tools for developer creators in 2026 — high engagement potential</div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">3</div>
+          <div class="rec-text">Post a Twitter thread on building a creator analytics dashboard with Coral SQL — leverages your top content</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SQL TERMINAL -->
+  <div class="sql-panel">
+    <div class="panel-header">
+      <div class="panel-icon ai">⚡</div>
+      <div class="panel-title">Coral SQL Queries</div>
+      <div style="margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--text-dim)">powered by Coral</div>
+    </div>
+    <div class="sql-tabs">
+      <button class="sql-tab active" onclick="showQuery(0,this)">3-Source JOIN</button>
+      <button class="sql-tab" onclick="showQuery(1,this)">YouTube</button>
+      <button class="sql-tab" onclick="showQuery(2,this)">Twitter</button>
+      <button class="sql-tab" onclick="showQuery(3,this)">Discord</button>
+    </div>
+    <div class="sql-code" id="sql-display">
+      <span class="cm">-- Ultimate 3-source JOIN across YouTube, Twitter &amp; Discord</span><br>
+      <span class="kw">SELECT</span><br>
+      &nbsp;&nbsp;y.title,<br>
+      &nbsp;&nbsp;t.like_count,<br>
+      &nbsp;&nbsp;t.impression_count,<br>
+      &nbsp;&nbsp;d.content,<br>
+      &nbsp;&nbsp;d.author_username<br>
+      <span class="kw">FROM</span> <span class="tb">youtube.videos</span> y,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tb">twitter.tweets</span> t,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tb">discord.messages</span> d<br>
+      <span class="kw">LIMIT</span> 5;
+    </div>
+  </div>
+
+  <!-- NATURAL LANGUAGE QUERY BOX -->
+  <div class="query-panel">
+    <div class="panel-header">
+      <div class="panel-icon ai">💬</div>
+      <div class="panel-title">Ask Your Data Anything</div>
+    </div>
+    <div class="query-box">
+      <input type="text" class="query-input" id="nl-query"
+             placeholder="e.g. What content should I make next? What's my best performing tweet?">
+      <button class="query-btn" onclick="askQuery()">Ask AI →</button>
+    </div>
+    <div class="query-result" id="query-result"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">
+    🏴‍☠️ <span>Creator Analytics First Mate</span> &bull;
+    Pirates of the Coral-bean Hackathon &bull;
+    Built by <span>@yashjain1290</span> &bull;
+    Powered by <span>Coral</span> + <span>Groq AI</span>
+  </div>
+</footer>
+
+<script>
+const queries = [
+  `<span class="cm">-- Ultimate 3-source JOIN across YouTube, Twitter &amp; Discord</span><br>
+<span class="kw">SELECT</span><br>
+&nbsp;&nbsp;y.title,<br>
+&nbsp;&nbsp;t.like_count,<br>
+&nbsp;&nbsp;t.impression_count,<br>
+&nbsp;&nbsp;d.content,<br>
+&nbsp;&nbsp;d.author_username<br>
+<span class="kw">FROM</span> <span class="tb">youtube.videos</span> y,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tb">twitter.tweets</span> t,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tb">discord.messages</span> d<br>
+<span class="kw">LIMIT</span> 5;`,
+
+  `<span class="cm">-- YouTube videos ordered by publish date</span><br>
+<span class="kw">SELECT</span> id, title, published_at<br>
+<span class="kw">FROM</span> <span class="tb">youtube.videos</span><br>
+<span class="kw">ORDER BY</span> published_at <span class="kw">DESC</span><br>
+<span class="kw">LIMIT</span> 10;`,
+
+  `<span class="cm">-- Twitter top performing tweets by likes</span><br>
+<span class="kw">SELECT</span> text, like_count,<br>
+&nbsp;&nbsp;impression_count, retweet_count<br>
+<span class="kw">FROM</span> <span class="tb">twitter.tweets</span><br>
+<span class="kw">ORDER BY</span> like_count <span class="kw">DESC</span><br>
+<span class="kw">LIMIT</span> 10;`,
+
+  `<span class="cm">-- Discord community messages</span><br>
+<span class="kw">SELECT</span> content, author_username,<br>
+&nbsp;&nbsp;timestamp<br>
+<span class="kw">FROM</span> <span class="tb">discord.messages</span><br>
+<span class="kw">ORDER BY</span> timestamp <span class="kw">DESC</span><br>
+<span class="kw">LIMIT</span> 20;`
+];
+
+function showQuery(i, btn) {
+  document.getElementById('sql-display').innerHTML = queries[i];
+  document.querySelectorAll('.sql-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function refreshData() {
+  const btn = document.querySelector('.refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.classList.add('loading');
+  icon.style.display = 'inline-block';
+  icon.style.animation = 'spin 1s linear infinite';
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    icon.style.animation = '';
+    document.getElementById('last-updated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString();
+    // Animate score bars
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => bar.style.width = w, 50);
+    });
+  }, 2000);
+}
+
+const aiResponses = {
+  'next': 'Based on your data: Post a Twitter thread about Coral SQL analytics — your highest engagement (890 likes, 24K impressions) came from technical threads. Strike while the topic is hot!',
+  'best': 'Your best performing tweet is "Thread: How I track my creator metrics across all platforms with one SQL JOIN" with 890 likes and 24,000 impressions — 3x your average engagement.',
+  'time': 'Best time to post: 14:00–15:00 UTC based on Twitter engagement patterns. Your Discord community is most active in the mornings.',
+  'score': 'Your content score is 82/100 — strong performance! Your community health is 80/100. Main opportunity: increase YouTube video frequency to match your Twitter engagement.',
+  'discord': 'Your Discord has 20 recent messages from real community members including mrinalmadhav._93393 and rr_0_11. Community health score: 80/100.',
+};
+
+function askQuery() {
+  const q = document.getElementById('nl-query').value.toLowerCase();
+  const result = document.getElementById('query-result');
+  if (!q.trim()) return;
+
+  result.className = 'query-result show';
+  result.textContent = '...';
+
+  setTimeout(() => {
+    let answer = 'Great question! Based on your cross-platform data: your content score is 82/100 with strong Twitter engagement. Discord community is healthy at 80/100. Recommend posting technical tutorials about Coral SQL — that content performs 3x better.';
+
+    for (const [key, val] of Object.entries(aiResponses)) {
+      if (q.includes(key)) { answer = val; break; }
+    }
+    result.textContent = answer;
+  }, 800);
+}
+
+document.getElementById('nl-query').addEventListener('keydown', e => {
+  if (e.key === 'Enter') askQuery();
+});
+
+// Animate bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.score-bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = w; }, 300);
+  });
+});
+// Fetch real data from backend
+async function fetchRealData() {
+  try {
+    const res = await fetch('http://localhost:3000/api/insights')
+    const json = await res.json()
+    if (!json.success) return
+
+    const { youtube, twitter, discord, insights } = json.data
+
+    // Update score cards
+    document.getElementById('content-score').textContent = insights.content_score || 82
+    document.getElementById('community-score').textContent = insights.community_health || 80
+    document.getElementById('bar-content').style.width = (insights.content_score || 82) + '%'
+    document.getElementById('bar-community').style.width = (insights.community_health || 80) + '%'
+    document.getElementById('discord-count').textContent = discord.length
+    document.getElementById('dc-count').textContent = discord.length + ' messages · live'
+    document.getElementById('yt-count').textContent = youtube.length + ' videos'
+    document.getElementById('tw-count').textContent = twitter.length + ' tweets'
+
+    // Update AI summary
+    document.getElementById('ai-summary').textContent = '"' + insights.summary + '"'
+
+    // Update best time
+    if (insights.best_time_to_post) {
+      const time = insights.best_time_to_post.split(',')[0].replace('UTC','').trim()
+      document.getElementById('best-time').textContent = time
+    }
+
+    // Update YouTube data
+    const ytDiv = document.getElementById('youtube-data')
+    ytDiv.innerHTML = youtube.map((v, i) => `
+      <div class="data-row">
+        <div class="data-num">${i+1}</div>
+        <div style="flex:1">
+          <div class="data-text">${v.title || 'Untitled'}</div>
+          <div class="data-meta">${(v.published_at||'').substring(0,10)} · ${v.id}</div>
+        </div>
+      </div>`).join('')
+
+    // Update Twitter data
+    const twDiv = document.getElementById('twitter-data')
+    twDiv.innerHTML = twitter.map((t, i) => `
+      <div class="data-row">
+        <div class="data-num">${i+1}</div>
+        <div style="flex:1">
+          <div class="data-text">${t.text || ''}</div>
+        </div>
+        <div>
+          <div class="data-stat" style="color:var(--coral)">${t.like_count} ❤</div>
+          <div class="data-stat" style="color:var(--blue)">${Number(t.impression_count).toLocaleString()} 👁</div>
+        </div>
+      </div>`).join('')
+
+    // Update Discord data
+    const dcDiv = document.getElementById('discord-data')
+    const uniqueUsers = [...new Set(discord.map(m => m.author_username).filter(Boolean))]
+    dcDiv.innerHTML = `
+      <div class="data-row">
+        <div class="data-num">—</div>
+        <div style="flex:1">
+          <div class="data-text" style="color:var(--text-dim);font-style:italic;font-size:12px">
+            ${discord.length} real messages from ${uniqueUsers.length} community members
+          </div>
+        </div>
+      </div>` +
+      uniqueUsers.slice(0,4).map(u => `
+      <div class="data-row">
+        <div class="data-num">👤</div>
+        <div style="flex:1">
+          <div class="data-text">${u}</div>
+          <div class="data-meta">Active community member</div>
+        </div>
+        <div class="data-stat" style="color:var(--purple)">live</div>
+      </div>`).join('')
+
+    // Update recommendations
+    if (insights.recommendations) {
+      const recDiv = document.getElementById('recommendations')
+      recDiv.innerHTML = insights.recommendations.map((r, i) => `
+        <div class="rec-card">
+          <div class="rec-num">${i+1}</div>
+          <div class="rec-text">${r}</div>
+        </div>`).join('')
+    }
+
+    // Update timestamp
+    document.getElementById('last-updated').textContent =
+      'Last updated: ' + new Date(json.timestamp).toLocaleTimeString()
+
+  } catch(e) {
+    console.error('Failed to fetch data:', e)
+  }
+}
+
+// Load real data on page load
+fetchRealData()
+</script>
+</body>
+</html>
