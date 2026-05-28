@@ -9,6 +9,8 @@ import Twitter from './pages/Twitter'
 import Discord from './pages/Discord'
 import Insights from './pages/Insights'
 import Connect from './pages/Connect'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 
 export default function App() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
           <Route path="/connect" element={
             <ProtectedRoute><Connect /></ProtectedRoute>
           } />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
