@@ -169,15 +169,7 @@ app.get('/api/discord', isAuth, (req, res) => {
 })
 
 const PORT = 3000
-// Catch-all route for React Router
-app.get('/{*path}', (req, res) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API route not found' })
-  }
-  const indexPath = path.join(__dirname, 'frontend', 'dist', 'index.html')
-  console.log('Serving index from:', indexPath)
-  res.sendFile(indexPath)
-})
+
 
 // ── YOUTUBE OAUTH ROUTES ──
 app.get('/api/auth/youtube', isAuth, (req, res) => {
@@ -235,6 +227,28 @@ app.get('/api/youtube/real', isAuth, async (req, res) => {
     res.status(500).json({ success: false, error: err.message })
   }
 })
+
+app.get('/api/history', isAuth, async (req, res) => {
+  try {
+    const history = await InsightHistory.find({ userId: req.user.id })
+      .sort({ date: -1 })
+      .limit(10)
+    res.json({ success: true, data: history })
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// Catch-all route for React Router
+app.get('/{*path}', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' })
+  }
+  const indexPath = path.join(__dirname, 'frontend', 'dist', 'index.html')
+  console.log('Serving index from:', indexPath)
+  res.sendFile(indexPath)
+})
+
 app.listen(PORT, () => {
   console.log(`\n🏴‍☠️ Server running on http://localhost:${PORT}`)
   console.log(`🔐 Auth: http://localhost:${PORT}/api/auth/google\n`)
