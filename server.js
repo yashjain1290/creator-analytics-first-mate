@@ -122,9 +122,21 @@ app.get('/api/auth/logout', (req, res) => {
 // ── DATA ROUTES (protected) ──
 app.get('/api/insights', isAuth, async (req, res) => {
   try {
-    const youtubeData = runQuery('...')
-    const twitterData = runQuery('...')
-    const discordData = runQuery('...')
+    const user = await User.findById(req.user.id)
+    
+    // Use real YouTube data if connected
+    let youtubeData
+    if (user?.platforms?.youtube?.connected) {
+      youtubeData = await youtubeAuth.getVideos(
+        user.platforms.youtube.accessToken,
+        user.platforms.youtube.refreshToken
+      )
+    } else {
+      youtubeData = runQuery('SELECT id, title, published_at FROM youtube.videos LIMIT 10')
+    }
+
+    const twitterData = runQuery('SELECT text, like_count, impression_count, retweet_count, reply_count FROM twitter.tweets LIMIT 10')
+    const discordData = runQuery('SELECT content, author_username, timestamp FROM discord.messages LIMIT 20')
     const insights = await analyzeCreatorData(youtubeData, twitterData, discordData)
 
     // Save to history
@@ -153,9 +165,21 @@ app.get('/api/insights', isAuth, async (req, res) => {
   }
 })
 
-app.get('/api/youtube', isAuth, (req, res) => {
-  const data = runQuery('SELECT id, title, published_at, description FROM youtube.videos LIMIT 10')
-  res.json({ success: true, data })
+app.get('/api/youtube', isAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+    if (user?.platforms?.youtube?.connected) {
+      const videos = await youtubeAuth.getVideos(
+        user.platforms.youtube.accessToken,
+        user.platforms.youtube.refreshToken
+      )
+      return res.json({ success: true, data: videos, source: 'real' })
+    }
+    const data = runQuery('SELECT id, title, published_at, description FROM youtube.videos LIMIT 10')
+    res.json({ success: true, data, source: 'mock' })
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message })
+  }
 })
 
 app.get('/api/twitter', isAuth, (req, res) => {
