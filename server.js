@@ -305,6 +305,9 @@ app.get('/api/auth/discord', isAuth, (req, res) => {
 })
 
 app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
+    if (!req.isAuthenticated()) {
+    return res.redirect(process.env.FRONTEND_URL + '/login')
+  }
   try {
     const { code, error } = req.query
     
@@ -346,11 +349,16 @@ app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
 
     console.log('Discord connected for:', req.user.email)
     res.redirect(process.env.FRONTEND_URL + '/connect?discord=connected')
+    req.session.save((err) => {
+      if (err) console.error('Session save error:', err)
+      res.redirect(process.env.FRONTEND_URL + '/connect?discord=connected')
+    })
   } catch (err) {
     console.error('Discord OAuth error:', err.message)
     res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_failed')
   }
 })
+
 
 // Get real Discord data
 app.get('/api/discord/real', isAuth, async (req, res) => {
