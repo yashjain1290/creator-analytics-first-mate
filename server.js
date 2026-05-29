@@ -5,6 +5,7 @@ const { User, Analytics, InsightHistory } = require('./db/models')
 // Connect to MongoDB
 connectDB()
 const youtubeAuth = require('./auth/youtube')
+const discordAuth = require('./auth/discord')
 const express = require('express')
 const cors = require('cors')
 const session = require('express-session')
@@ -187,9 +188,36 @@ app.get('/api/twitter', isAuth, (req, res) => {
   res.json({ success: true, data })
 })
 
-app.get('/api/discord', isAuth, (req, res) => {
-  const data = runQuery('SELECT content, author_username, timestamp FROM discord.messages LIMIT 20')
-  res.json({ success: true, data })
+app.get('/api/discord', isAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+    if (user?.platforms?.discord?.connected) {
+      const guilds = user.platforms.discord.guilds
+      if (guilds && guilds.length > 0) {
+        const channels = await discordAuth.getGuildChannels(
+          guilds[0].id,
+          process.env.DISCORD_BOT_TOKEN
+        )
+        if (channels && channels.length > 0) {
+          const messages = await discordAuth.getMessages(
+            channels[0].id,
+            process.env.DISCORD_BOT_TOKEN
+          )
+          const data = messages.map(m => ({
+            id: m.id,
+            content: m.content,
+            author_username: m.author?.username,
+            timestamp: m.timestamp
+          }))
+          return res.json({ success: true, data, source: 'real' })
+        }
+      }
+    }
+    const data = runQuery('SELECT content, author_username, timestamp FROM discord.messages LIMIT 20')
+    res.json({ success: true, data, source: 'mock' })
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message })
+  }
 })
 
 const PORT = 3000
@@ -258,6 +286,85 @@ app.get('/api/history', isAuth, async (req, res) => {
       .sort({ date: -1 })
       .limit(10)
     res.json({ success: true, data: history })
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// ── DISCORD OAUTH ROUTES ──
+app.get('/api/auth/discord', isAuth, (req, res) => {
+  const url = discordAuth.getAuthUrl()
+  res.redirect(url)
+})
+
+app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
+  try {
+    const { code } = req.query
+    if (!code) throw new Error('No code provided')
+
+    const tokens = await discordAuth.getTokens(code)
+    const discordUser = await discordAuth.getDiscordUser(tokens.access_token)
+    const guilds = await discordAuth.getGuilds(tokens.access_token)
+
+    // Save to MongoDB
+    await User.findByIdAndUpdate(req.user.id, {
+      'platforms.discord': {
+        connected: true,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        discordUserId: discordUser.id,
+        username: discordUser.username,
+        guilds: guilds.map(g => ({ id: g.id, name: g.name }))
+      }
+    })
+
+    console.log('Discord connected for:', req.user.email)
+    res.redirect(process.env.FRONTEND_URL + '/connect?discord=connected')
+  } catch (err) {
+    console.error('Discord OAuth error:', err)
+    res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_failed')
+  }
+})
+
+// Get real Discord data
+app.get('/api/discord/real', isAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+
+    if (!user?.platforms?.discord?.connected) {
+      return res.json({ success: false, error: 'Discord not connected' })
+    }
+
+    // Get channels from first guild
+    const guilds = user.platforms.discord.guilds
+    if (!guilds || guilds.length === 0) {
+      return res.json({ success: false, error: 'No servers found' })
+    }
+
+    const firstGuildId = guilds[0].id
+    const channels = await discordAuth.getGuildChannels(
+      firstGuildId,
+      process.env.DISCORD_BOT_TOKEN
+    )
+
+    if (!channels || channels.length === 0) {
+      return res.json({ success: false, error: 'No channels found' })
+    }
+
+    // Get messages from first text channel
+    const messages = await discordAuth.getMessages(
+      channels[0].id,
+      process.env.DISCORD_BOT_TOKEN
+    )
+
+    const formattedMessages = messages.map(m => ({
+      id: m.id,
+      content: m.content,
+      author_username: m.author?.username,
+      timestamp: m.timestamp
+    }))
+
+    res.json({ success: true, data: formattedMessages })
   } catch (err) {
     res.status(500).json({ success: false, error: err.message })
   }

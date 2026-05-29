@@ -7,16 +7,14 @@ export default function Connect() {
   const [status, setStatus] = useState({ youtube: false, twitter: false, discord: false })
 
   useEffect(() => {
-    // Check URL params for success/error
     const params = new URLSearchParams(window.location.search)
     if (params.get('youtube') === 'connected') {
       setStatus(s => ({ ...s, youtube: true }))
     }
+    if (params.get('discord') === 'connected') {
+      setStatus(s => ({ ...s, discord: true }))
+    }
   }, [])
-
-  const connectYouTube = () => {
-    window.location.href = '/api/auth/youtube'
-  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#080c0b' }}>
@@ -48,7 +46,7 @@ export default function Connect() {
                 Connect to see real video analytics
               </div>
             </div>
-            <button onClick={connectYouTube} style={{
+            <button onClick={() => window.location.href = '/api/auth/youtube'} style={{
               background: status.youtube ? '#1de9a0' : 'rgba(255,107,74,0.15)',
               color: status.youtube ? '#080c0b' : '#ff6b4a',
               border: `1px solid ${status.youtube ? '#1de9a0' : 'rgba(255,107,74,0.3)'}`,
@@ -103,22 +101,24 @@ export default function Connect() {
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>Discord</div>
               <div style={{ fontSize: '12px', color: '#7a9e90', fontFamily: 'Space Mono, monospace' }}>
-                Add bot to your server to track community
+                Connect to track your community activity
               </div>
             </div>
-            <button style={{
-              background: 'rgba(155,127,255,0.05)',
-              color: '#7a9e90',
-              border: '1px solid rgba(155,127,255,0.1)',
-              padding: '10px 20px', borderRadius: '10px',
-              fontFamily: 'Syne, sans-serif', fontWeight: '700',
-              fontSize: '13px', cursor: 'not-allowed'
-            }}>
-              Coming Soon
+            <button
+              onClick={() => window.location.href = '/api/auth/discord'}
+              style={{
+                background: status.discord ? '#1de9a0' : 'rgba(155,127,255,0.15)',
+                color: status.discord ? '#080c0b' : '#9b7fff',
+                border: `1px solid ${status.discord ? '#1de9a0' : 'rgba(155,127,255,0.3)'}`,
+                padding: '10px 20px', borderRadius: '10px',
+                fontFamily: 'Syne, sans-serif', fontWeight: '700',
+                fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s'
+              }}>
+              {status.discord ? '✓ Connected' : 'Connect'}
             </button>
           </div>
 
-        </div>
+        </div> {/* ← closes the grid div */}
 
         {/* Note */}
         <div style={{
@@ -127,9 +127,10 @@ export default function Connect() {
           borderRadius: '12px', padding: '16px'
         }}>
           <div style={{ fontSize: '12px', color: '#7a9e90', fontFamily: 'Space Mono, monospace', lineHeight: '1.7' }}>
-            💡 This is a self-hosted personal analytics tool. Your API tokens are stored securely in MongoDB and never shared. Twitter/X and Discord OAuth coming in the next version.
+            💡 Your API tokens are stored securely in MongoDB and never shared. Twitter/X OAuth coming in the next version.
           </div>
         </div>
+
       </main>
     </div>
   )
