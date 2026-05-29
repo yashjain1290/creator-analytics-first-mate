@@ -105,6 +105,10 @@ app.get('/api/auth/google',
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
+    console.log('Google callback - isAuthenticated:', req.isAuthenticated())
+    console.log('Google callback - user:', req.user)
+    console.log('Google callback - sessionID:', req.sessionID)
+    console.log('Google callback - session:', req.session)
     res.redirect(process.env.FRONTEND_URL + '/dashboard')
   }
 )
