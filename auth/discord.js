@@ -10,8 +10,7 @@ function getAuthUrl() {
     client_id: DISCORD_CLIENT_ID,
     redirect_uri: DISCORD_CALLBACK_URL,
     response_type: 'code',
-    scope: 'identify guilds bot',
-    permissions: '68608'
+    scope: 'identify guilds'
   })
   return `https://discord.com/api/oauth2/authorize?${params.toString()}`
 }

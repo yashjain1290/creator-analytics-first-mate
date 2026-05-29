@@ -299,14 +299,33 @@ app.get('/api/auth/discord', isAuth, (req, res) => {
 
 app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
   try {
-    const { code } = req.query
-    if (!code) throw new Error('No code provided')
+    const { code, error } = req.query
+    
+    if (error) {
+      console.error('Discord callback error:', error)
+      return res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_denied')
+    }
+    
+    if (!code) {
+      console.error('No code in Discord callback')
+      return res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_failed')
+    }
 
+    console.log('Discord callback received, exchanging code...')
     const tokens = await discordAuth.getTokens(code)
-    const discordUser = await discordAuth.getDiscordUser(tokens.access_token)
-    const guilds = await discordAuth.getGuilds(tokens.access_token)
+    console.log('Discord tokens:', JSON.stringify(tokens))
+    
+    if (tokens.error) {
+      console.error('Discord token error:', tokens.error)
+      return res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_failed')
+    }
 
-    // Save to MongoDB
+    const discordUser = await discordAuth.getDiscordUser(tokens.access_token)
+    console.log('Discord user:', discordUser.username)
+    
+    const guilds = await discordAuth.getGuilds(tokens.access_token)
+    console.log('Discord guilds:', guilds.length)
+
     await User.findByIdAndUpdate(req.user.id, {
       'platforms.discord': {
         connected: true,
@@ -321,7 +340,7 @@ app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
     console.log('Discord connected for:', req.user.email)
     res.redirect(process.env.FRONTEND_URL + '/connect?discord=connected')
   } catch (err) {
-    console.error('Discord OAuth error:', err)
+    console.error('Discord OAuth error:', err.message)
     res.redirect(process.env.FRONTEND_URL + '/connect?error=discord_failed')
   }
 })
