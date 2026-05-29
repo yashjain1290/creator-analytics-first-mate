@@ -388,12 +388,14 @@ app.get('/api/discord/real', isAuth, async (req, res) => {
     res.status(500).json({ success: false, error: err.message })
   }
 })
-app.get('/api/debug/user', isAuth, async (req, res) => {
-  const user = await User.findById(req.user.id)
+app.get('/api/debug/session', (req, res) => {
   res.json({
-    platforms: user.platforms,
-    discordConnected: user?.platforms?.discord?.connected,
-    guilds: user?.platforms?.discord?.guilds
+    isAuthenticated: req.isAuthenticated(),
+    sessionID: req.sessionID,
+    user: req.user || null,
+    mongoUri: !!process.env.MONGODB_URI,
+    sessionSecret: !!process.env.SESSION_SECRET,
+    nodeEnv: process.env.NODE_ENV
   })
 })
 
