@@ -230,6 +230,9 @@ app.get('/api/auth/youtube', isAuth, (req, res) => {
 })
 
 app.get('/api/auth/youtube/callback', isAuth, async (req, res) => {
+    if (!req.isAuthenticated()) {
+    return res.redirect(process.env.FRONTEND_URL + '/login')
+  }
   try {
     const { code } = req.query
     const tokens = await youtubeAuth.getTokens(code)
@@ -298,6 +301,9 @@ app.get('/api/auth/discord', isAuth, (req, res) => {
 })
 
 app.get('/api/auth/discord/callback', isAuth, async (req, res) => {
+    if (!req.isAuthenticated()) {
+    return res.redirect(process.env.FRONTEND_URL + '/login')
+  }
   try {
     const { code, error } = req.query
     
