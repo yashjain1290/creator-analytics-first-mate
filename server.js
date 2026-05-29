@@ -388,6 +388,14 @@ app.get('/api/discord/real', isAuth, async (req, res) => {
     res.status(500).json({ success: false, error: err.message })
   }
 })
+app.get('/api/debug/user', isAuth, async (req, res) => {
+  const user = await User.findById(req.user.id)
+  res.json({
+    platforms: user.platforms,
+    discordConnected: user?.platforms?.discord?.connected,
+    guilds: user?.platforms?.discord?.guilds
+  })
+})
 
 // Catch-all route for React Router
 app.get('/{*path}', (req, res) => {
